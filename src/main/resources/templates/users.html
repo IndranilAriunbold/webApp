@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout :: headerFragment">
+</head>
+<body>
+	<div id="container">
+		<h1>
+			Hello, <span th:text="${username}">--name--</span>.
+		</h1>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Email</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="user : ${users}">
+					<td th:text="${user.id}">Text ...</td>
+					<td th:text="${user.name}">Text ...</td>
+					<td th:text="${user.email}">Text ...</td>
+				</tr>
+			</tbody>
+		</table>
+		<div id="pagefoot" th:include="layout :: footerFragment">Footer
+		</div>
+	</div>
+	<!-- container -->
+</body>
+</html>

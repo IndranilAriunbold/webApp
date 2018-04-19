@@ -24,6 +24,7 @@ import java.util.List;
 
 @Component
 public class UserService {
+    
     @Autowired
     private KeycloakRestTemplate restTemplate;
     //private RestTemplate restTemplate;
@@ -70,7 +71,7 @@ public class UserService {
 
         //For same hosts ; HttpGet httpGet = new HttpGet(UriUtils.getOrigin(request.getRequestURL().toString()) + "/");
         //Request is made to remote REST Service!
-        String url = "http://localhost:8080/demo/all";
+        String url = "http://127.0.0.1:8080/demo/all";
         //HttpHeaders headers = new HttpHeaders();
         //headers.setContentType(MediaType.APPLICATION_JSON);
         //String token = principal.toString();
@@ -110,7 +111,7 @@ public class UserService {
 //        CloseableHttpClient client = HttpClientBuilder.create().build();
 //        try {
 
-        String url = "http://localhost:8080/demo/add";
+        String url = "http://172.17.0.3:8080/demo/add";
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);

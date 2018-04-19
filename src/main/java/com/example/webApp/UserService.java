@@ -1,10 +1,13 @@
 package com.example.webApp;
 
 import com.example.Model.User;
-import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -21,12 +24,25 @@ import java.util.List;
 
 @Component
 public class UserService {
+    @Autowired
+    private KeycloakRestTemplate restTemplate;
+    //private RestTemplate restTemplate;
+
     private User user = new User();
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    private final RestTemplate restTemplate;
 
-    public UserService(RestTemplateBuilder restTemplateBuilder){
-        this.restTemplate = restTemplateBuilder.build();
+    public AccessToken getAccessToken() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                .currentRequestAttributes())
+                .getRequest();
+        AccessToken accessToken = ((KeycloakPrincipal) ((KeycloakAuthenticationToken) request.getUserPrincipal()).getPrincipal())
+                .getKeycloakSecurityContext().getToken();
+        return accessToken;
+    }
+    public HttpServletRequest getRequest(){
+        return ((ServletRequestAttributes) RequestContextHolder
+                .currentRequestAttributes())
+                .getRequest();
     }
     static class TypedList extends ArrayList<String> {}
     public static class Failure extends Exception {
@@ -42,29 +58,28 @@ public class UserService {
     }
 
     //public List<User> getAllUsersFromDB(HttpServletRequest request) throws Failure, IOException {
-    public List<User> getAllUsersFromDB() throws Failure, IOException {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                .getRequest();
-        logger.info("getAllUsersFromDB ", request);
-        logger.info(String.valueOf(request));
-        final Principal userPrincipal = request.getUserPrincipal();
-        KeycloakSecurityContext mySecurityContext = (KeycloakSecurityContext)request.getAttribute(KeycloakSecurityContext.class.getName());
-        String token = mySecurityContext.getTokenString();
+    public List<User> getAllUsersFromDB(Principal principal) throws Failure, IOException {
+        //current Request
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        //principal.getName();
+        //KeycloakSecurityContext mySecurityContext = (KeycloakSecurityContext)request.getAttribute(KeycloakSecurityContext.class.getName());
+        //String token = mySecurityContext.getTokenString();
+        //AccessToken token = ((KeycloakPrincipal) ((KeycloakAuthenticationToken) request.getUserPrincipal()).getPrincipal()).getKeycloakSecurityContext().getToken();
         logger.info("token");
+
+
         //For same hosts ; HttpGet httpGet = new HttpGet(UriUtils.getOrigin(request.getRequestURL().toString()) + "/");
         //Request is made to remote REST Service!
         String url = "http://localhost:8080/demo/all";
-        HttpHeaders headers = new HttpHeaders();
-        //headers.add("Authorization", "Bearer " + token);
-        //headers.add("Content-Type", "application/json");
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer "+token);
+        //HttpHeaders headers = new HttpHeaders();
+        //headers.setContentType(MediaType.APPLICATION_JSON);
+        //String token = principal.toString();
+        //headers.set("Authorization", "Bearer "+token);
         //headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        //HttpEntity<model.User> entity = new HttpEntity<> (headers);
-        HttpEntity<String> entity = new HttpEntity<> (headers);
+        //HttpEntity<String> entity = new HttpEntity<> (headers);
         logger.info("entity");
-        ResponseEntity<User[]> result = restTemplate.exchange(url, HttpMethod.GET, entity, User[].class);
-        //ResponseEntity<User[]> result = restTemplate.getForEntity(url, User[].class);
+        //ResponseEntity<User[]> result = restTemplate.exchange(url, HttpMethod.GET, entity, User[].class);
+        ResponseEntity<User[]> result = restTemplate.getForEntity(url, User[].class);
         return Arrays.asList(result.getBody());
 
     }
@@ -74,18 +89,20 @@ public class UserService {
         return Arrays.asList(request ,"Big", "Middle", "Small");
     }
 
+    //TODO change for KeycloakResttemplate
     public String MakeAUserForDB() throws Exception{
     //public String MakeAUserForDB(HttpServletRequest request) throws Exception{
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest();
         logger.info("About to Post");
         //Get the token
-        KeycloakSecurityContext mySecurityContext = (KeycloakSecurityContext)request.getAttribute(KeycloakSecurityContext.class.getName());
-        String token = mySecurityContext.getTokenString();
-
+        //KeycloakSecurityContext mySecurityContext = (KeycloakSecurityContext)request.getAttribute(KeycloakSecurityContext.class.getName());
+        //String token = mySecurityContext.getTokenString();
+        AccessToken token = ((KeycloakPrincipal) ((KeycloakAuthenticationToken) request.getUserPrincipal()).getPrincipal())
+                .getKeycloakSecurityContext().getToken();
         // turn the character to JSON, now send the character on to the Mongo Service
-        String name = mySecurityContext.getIdToken().getPreferredUsername();
-        String email = mySecurityContext.getIdToken().getEmail();
+        String name = token.getPreferredUsername();
+        String email = token.getEmail();
         user.setName(name);
         user.setEmail(email);
         System.out.println("User" + user.toString());

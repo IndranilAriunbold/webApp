@@ -10,6 +10,9 @@
 
 	<name>webApp</name>
 	<description>webApp Spring Boot - Frontend </description>
+	<properties>
+		<docker.image.prefix>shortygeorge</docker.image.prefix>
+	</properties>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

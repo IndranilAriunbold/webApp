@@ -8,12 +8,12 @@
 			<h1>User Portal</h1>
 		</div>
 		<div>
-			<p>Landing Page of Our App, served on host  <span th:text="${hostname}">--name--</span> </p>
-
-			<h2>Existing Customers</h2>
+			<h2>
+				Hello, <span th:text="${username}">--name--</span> you are logged in :) .
+			</h2>
 
 			<div class="well">
-				<b>Enter the userAccount: </b><a th:href="@{/login}">login</a>
+				<b>enter intranet: </b><a th:href="@{/users}">users</a>
 			</div>
 		</div>
 		<div id="pagefoot" th:include="layout :: footerFragment">Footer
